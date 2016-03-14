@@ -19,9 +19,9 @@ int main(int argc, char *argv[]) {
         // Return failure in exit status
         exit(1);
     }
-    // PARENT PROCESS. Need to kill it.
+    // Parent process
     if (process_id > 0) {
-        printf("process_id of child process %d \n", process_id);
+        printf("first fork child %d \n", process_id);
         // return success in exit status
         exit(0);
     }
@@ -42,9 +42,9 @@ int main(int argc, char *argv[]) {
         // Return failure in exit status
         exit(1);
     }
-    // PARENT PROCESS. Need to kill it.
+    // Parent process
     if (process_id > 0) {
-        printf("process_id of child process %d \n", process_id);
+        printf("second fork child %d \n", process_id);
         // return success in exit status
         exit(0);
     }
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
     // Open the log file
-    openlog ("http_daemon", LOG_PID, LOG_DAEMON);
+    openlog("http_daemon", LOG_PID, LOG_DAEMON);
     syslog (LOG_NOTICE, "HTTP daemon started.");
     syslog (LOG_NOTICE, "HTTP daemon terminated.");
     closelog();
