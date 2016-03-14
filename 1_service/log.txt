@@ -1,0 +1,248 @@
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ ./service_linux 
+first fork child 6206 
+second fork child 6207 
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ ps aux | grep service_linux
+artyom    6207  0.0  0.0   6524  1220 ?        S    01:30   0:00 ./service_linux
+artyom    6215  0.0  0.0  17932  2156 pts/18   S+   01:30   0:00 grep --color=auto service_linux
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ tail -n 1 /var/log/syslog
+Mar 15 01:30:26 hostname http_daemon[6207]: HTTP daemon started.
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ curl -v http://localhost:8080/test
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> GET /test HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.43.0
+> Accept: */*
+> 
+< HTTP/1.1 200 OK
+< Content-Length: 6
+< Content-Type: text/plain
+< 
+Hello
+* Connection #0 to host localhost left intact
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ curl http://localhost:8080/test
+Hello
+
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ curl http://localhost:8080/quit
+curl: (52) Empty reply from server
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ tail -n 1 /var/log/syslog
+Mar 15 01:36:25 hostname http_daemon[6207]: HTTP daemon terminated.
+
+
+
+
+
+
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ file service_linux
+service_linux: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=dde33a0f6576678c23303ad410c5f3b032024eb1, not stripped
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ ldd service_linux
+	linux-vdso.so.1 =>  (0x00007ffc43987000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f3ba6dbc000)
+	/lib64/ld-linux-x86-64.so.2 (0x000055ac9dd73000)
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ readelf -h service_linux
+Заголовок ELF:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 
+  Класс:                             ELF64
+  Данные:                            дополнение до 2, little endian
+  Версия:                            1 (current)
+  OS/ABI:                            UNIX - System V
+  Версия ABI:                        0
+  Тип:                               EXEC (Исполняемый файл)
+  Машина:                            Advanced Micro Devices X86-64
+  Версия:                            0x1
+  Адрес точки входа:               0x400e10
+  Начало заголовков программы:          64 (байт в файле)
+  Начало заголовков программы:          20976 (байт в файле)
+  Флаги:                             0x0
+  Размер этого заголовка:            64 (байт)
+  Размер заголовков программы:       56 (байт)
+  Число заголовков программы:        9
+  Размер заголовков раздела:         64 (байт)
+  Число заголовков раздела:          35
+  Индекс табл. строк загол. раздела: 32
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ ./service_linux 
+first fork child 7106 
+second fork child 7107 
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ sudo pmap 7107
+7107:   ./service_linux
+0000000000400000      8K r-x-- service_linux
+0000000000601000      4K r---- service_linux
+0000000000602000      4K rw--- service_linux
+0000000000c6a000    132K rw---   [ anon ]
+00007fa3a3a73000   1792K r-x-- libc-2.21.so
+00007fa3a3c33000   2048K ----- libc-2.21.so
+00007fa3a3e33000     16K r---- libc-2.21.so
+00007fa3a3e37000      8K rw--- libc-2.21.so
+00007fa3a3e39000     16K rw---   [ anon ]
+00007fa3a3e3d000    144K r-x-- ld-2.21.so
+00007fa3a4036000     12K rw---   [ anon ]
+00007fa3a405e000      8K rw---   [ anon ]
+00007fa3a4060000      4K r---- ld-2.21.so
+00007fa3a4061000      4K rw--- ld-2.21.so
+00007fa3a4062000      4K rw---   [ anon ]
+00007fff9814e000    132K rw---   [ stack ]
+00007fff981cd000      8K r----   [ anon ]
+00007fff981cf000      8K r-x--   [ anon ]
+ffffffffff600000      4K r-x--   [ anon ]
+ всего             4356K
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ sudo cat /proc/7107/maps 
+00400000-00402000 r-xp 00000000 08:04 1974003                            /home/artyom/OS/1_service/linux-build/service_linux
+00601000-00602000 r--p 00001000 08:04 1974003                            /home/artyom/OS/1_service/linux-build/service_linux
+00602000-00603000 rw-p 00002000 08:04 1974003                            /home/artyom/OS/1_service/linux-build/service_linux
+00c6a000-00c8b000 rw-p 00000000 00:00 0                                  [heap]
+7fa3a3a73000-7fa3a3c33000 r-xp 00000000 08:04 2494074                    /lib/x86_64-linux-gnu/libc-2.21.so
+7fa3a3c33000-7fa3a3e33000 ---p 001c0000 08:04 2494074                    /lib/x86_64-linux-gnu/libc-2.21.so
+7fa3a3e33000-7fa3a3e37000 r--p 001c0000 08:04 2494074                    /lib/x86_64-linux-gnu/libc-2.21.so
+7fa3a3e37000-7fa3a3e39000 rw-p 001c4000 08:04 2494074                    /lib/x86_64-linux-gnu/libc-2.21.so
+7fa3a3e39000-7fa3a3e3d000 rw-p 00000000 00:00 0 
+7fa3a3e3d000-7fa3a3e61000 r-xp 00000000 08:04 2494082                    /lib/x86_64-linux-gnu/ld-2.21.so
+7fa3a4036000-7fa3a4039000 rw-p 00000000 00:00 0 
+7fa3a405e000-7fa3a4060000 rw-p 00000000 00:00 0 
+7fa3a4060000-7fa3a4061000 r--p 00023000 08:04 2494082                    /lib/x86_64-linux-gnu/ld-2.21.so
+7fa3a4061000-7fa3a4062000 rw-p 00024000 08:04 2494082                    /lib/x86_64-linux-gnu/ld-2.21.so
+7fa3a4062000-7fa3a4063000 rw-p 00000000 00:00 0 
+7fff9814e000-7fff9816f000 rw-p 00000000 00:00 0                          [stack]
+7fff981cd000-7fff981cf000 r--p 00000000 00:00 0                          [vvar]
+7fff981cf000-7fff981d1000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ objdump -d service_linux
+
+service_linux:     формат файла elf64-x86-64
+
+
+Дизассемблирование раздела .init:
+
+0000000000400c30 <_init>:
+  400c30:	48 83 ec 08          	sub    $0x8,%rsp
+  400c34:	48 8b 05 bd 13 20 00 	mov    0x2013bd(%rip),%rax        # 601ff8 <_DYNAMIC+0x1d0>
+  400c3b:	48 85 c0             	test   %rax,%rax
+  400c3e:	74 05                	je     400c45 <_init+0x15>
+  400c40:	e8 fb 00 00 00       	callq  400d40 <__gmon_start__@plt>
+  400c45:	48 83 c4 08          	add    $0x8,%rsp
+  400c49:	c3                   	retq   
+...
+Дизассемблирование раздела .text:
+
+0000000000400e10 <_start>:
+  400e10:	31 ed                	xor    %ebp,%ebp
+  400e12:	49 89 d1             	mov    %rdx,%r9
+  400e15:	5e                   	pop    %rsi
+  400e16:	48 89 e2             	mov    %rsp,%rdx
+  400e19:	48 83 e4 f0          	and    $0xfffffffffffffff0,%rsp
+  400e1d:	50                   	push   %rax
+  400e1e:	54                   	push   %rsp
+  400e1f:	49 c7 c0 00 13 40 00 	mov    $0x401300,%r8
+  400e26:	48 c7 c1 90 12 40 00 	mov    $0x401290,%rcx
+  400e2d:	48 c7 c7 1f 11 40 00 	mov    $0x40111f,%rdi
+  400e34:	e8 e7 fe ff ff       	callq  400d20 <__libc_start_main@plt>
+  400e39:	f4                   	hlt    
+  400e3a:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+
+000000000040111f <main>:
+  40111f:	55                   	push   %rbp
+  401120:	48 89 e5             	mov    %rsp,%rbp
+  401123:	48 83 ec 20          	sub    $0x20,%rsp
+  401127:	89 7d ec             	mov    %edi,-0x14(%rbp)
+  40112a:	48 89 75 e0          	mov    %rsi,-0x20(%rbp)
+  40112e:	48 c7 45 f8 00 00 00 	movq   $0x0,-0x8(%rbp)
+  401135:	00 
+  401136:	c7 45 f0 00 00 00 00 	movl   $0x0,-0x10(%rbp)
+  40113d:	c7 45 f4 00 00 00 00 	movl   $0x0,-0xc(%rbp)
+  401144:	e8 97 fc ff ff       	callq  400de0 <fork@plt>
+
+
+
+
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ make clean
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ make
+[100%] Building CXX object CMakeFiles/service_linux.dir/main.cpp.o
+Linking CXX executable service_linux
+[100%] Built target service_linux
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ ldd service_linux
+	linux-vdso.so.1 =>  (0x00007ffe49fca000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f6150c1c000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f6150852000)
+	/lib64/ld-linux-x86-64.so.2 (0x0000565086a80000)
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ readelf -h service_linux
+Заголовок ELF:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 
+  Класс:                             ELF64
+  Данные:                            дополнение до 2, little endian
+  Версия:                            1 (current)
+  OS/ABI:                            UNIX - System V
+  Версия ABI:                        0
+  Тип:                               EXEC (Исполняемый файл)
+  Машина:                            Advanced Micro Devices X86-64
+  Версия:                            0x1
+  Адрес точки входа:               0x400e40
+  Начало заголовков программы:          64 (байт в файле)
+  Начало заголовков программы:          20976 (байт в файле)
+  Флаги:                             0x0
+  Размер этого заголовка:            64 (байт)
+  Размер заголовков программы:       56 (байт)
+  Число заголовков программы:        9
+  Размер заголовков раздела:         64 (байт)
+  Число заголовков раздела:          35
+  Индекс табл. строк загол. раздела: 32
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ ./service_linux 
+first fork child 8062 
+second fork child 8063 
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ sudo pmap 8063
+8063:   ./service_linux
+0000000000400000      8K r-x-- service_linux
+0000000000601000      4K r---- service_linux
+0000000000602000      4K rw--- service_linux
+0000000002511000    132K rw---   [ anon ]
+00007f63025ed000   1792K r-x-- libc-2.21.so
+00007f63027ad000   2048K ----- libc-2.21.so
+00007f63029ad000     16K r---- libc-2.21.so
+00007f63029b1000      8K rw--- libc-2.21.so
+00007f63029b3000     16K rw---   [ anon ]
+00007f63029b7000     96K r-x-- libpthread-2.21.so
+00007f63029cf000   2048K ----- libpthread-2.21.so
+00007f6302bcf000      4K r---- libpthread-2.21.so
+00007f6302bd0000      4K rw--- libpthread-2.21.so
+00007f6302bd1000     16K rw---   [ anon ]
+00007f6302bd5000    144K r-x-- ld-2.21.so
+00007f6302dce000     12K rw---   [ anon ]
+00007f6302df6000      8K rw---   [ anon ]
+00007f6302df8000      4K r---- ld-2.21.so
+00007f6302df9000      4K rw--- ld-2.21.so
+00007f6302dfa000      4K rw---   [ anon ]
+00007ffcbc854000    132K rw---   [ stack ]
+00007ffcbc9e1000      8K r----   [ anon ]
+00007ffcbc9e3000      8K r-x--   [ anon ]
+ffffffffff600000      4K r-x--   [ anon ]
+ всего             6524K
+artyom@artyom-H97-D3H:~/OS/1_service/linux-build$ objdump -d service_linux
+
+service_linux:     формат файла elf64-x86-64
+
+
+Дизассемблирование раздела .init:
+
+0000000000400c60 <_init>:
+  400c60:	48 83 ec 08          	sub    $0x8,%rsp
+  400c64:	48 8b 05 8d 13 20 00 	mov    0x20138d(%rip),%rax        # 601ff8 <_DYNAMIC+0x1e0>
+  400c6b:	48 85 c0             	test   %rax,%rax
+  400c6e:	74 05                	je     400c75 <_init+0x15>
+  400c70:	e8 fb 00 00 00       	callq  400d70 <__gmon_start__@plt>
+  400c75:	48 83 c4 08          	add    $0x8,%rsp
+  400c79:	c3                   	retq   
+
+Дизассемблирование раздела .text:
+
+0000000000400e40 <_start>:
+  400e40:	31 ed                	xor    %ebp,%ebp
+  400e42:	49 89 d1             	mov    %rdx,%r9
+  400e45:	5e                   	pop    %rsi
+  400e46:	48 89 e2             	mov    %rsp,%rdx
+  400e49:	48 83 e4 f0          	and    $0xfffffffffffffff0,%rsp
+  400e4d:	50                   	push   %rax
+  400e4e:	54                   	push   %rsp
+  400e4f:	49 c7 c0 30 13 40 00 	mov    $0x401330,%r8
+  400e56:	48 c7 c1 c0 12 40 00 	mov    $0x4012c0,%rcx
+  400e5d:	48 c7 c7 4f 11 40 00 	mov    $0x40114f,%rdi
+  400e64:	e8 e7 fe ff ff       	callq  400d50 <__libc_start_main@plt>
+  400e69:	f4                   	hlt    
+  400e6a:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
